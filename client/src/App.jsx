@@ -7,7 +7,7 @@ import MovieDetails from './Pages/MovieDetails'
 import SeatLayout from './Pages/SeatLayout'
 import MyBookings from './Pages/MyBookings'
 import Favorite from './Pages/Favorite'
-import Footer from './components/footer'
+import Footer from './components/Footer'
 import { Toaster } from "react-hot-toast";
 import Layout from './Pages/admin/Layout';
 import Dashboard from './Pages/admin/DashBoard';
