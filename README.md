@@ -27,6 +27,7 @@ Password: movies@2026
 * Admin Access:
 
 Open /admin after login to access admin dashboard.
+admin Email: [srini00731@gmail.com]
 admin how to open in https://localhost:5173/admin
 
 ---
