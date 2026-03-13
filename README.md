@@ -7,6 +7,30 @@ This frontend communicates with the **Movie Booking Backend API**.
 
 ---
 
+# Login accuracy
+
+Hello,
+
+Thank you for reviewing the application.
+
+* Demo Login Credentials:
+
+Email: [srini00731@gmail.com](mailto:srini00731@gmail.com)
+Password: movies@2026
+
+* Instructions:
+
+1. Login using the above account.
+2. You can test movie booking, favorites, and admin dashboard.
+3. For payment, Razorpay test mode is enabled.
+
+* Admin Access:
+
+Open /admin after login to access admin dashboard.
+admin how to open in https://localhost:5173/admin
+
+---
+
 # Features
 
 * Browse movies and showtimes
