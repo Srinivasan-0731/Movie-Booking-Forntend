@@ -1,98 +1,150 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { useAuth, useUser } from "@clerk/clerk-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
+
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
+
+
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [shows, setShows] = useState([]);
-    const [favoriteMovies, setFavoriteMovies] = useState([]);
+  const navigate = useNavigate();
 
-    const image_base_url = import.meta.env.VITE_TMDB_IMAGE_BASE_URL;
-    console.log("Image Base URL:", image_base_url);
+  
+  const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(null);
+  const [shows, setShows] = useState([]);
+  const [favoriteMovies, setFavoriteMovies] = useState([]);
 
-    const { user } = useUser();
-    const { getToken } = useAuth();
-    const location = useLocation();
-    const navigate = useNavigate();
+  const image_base_url = import.meta.env.VITE_TMDB_IMAGE_BASE_URL;
 
-    const fetchIsAdmin = async () => {
-        try {
-            const { data } = await axios.get("/api/admin/is-admin", {
-                headers: { Authorization: `Bearer ${await getToken()}` },
-            });
+  
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
 
-            setIsAdmin(data.isAdmin);
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      setIsAdmin(false);
+    }
+  }, []);
 
-            if (!data.isAdmin && location.pathname.startsWith("/admin")) {
-                navigate("/");
-                toast.error("You are not authorized to access admin dashboard");
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
+  
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-    const fetchShows = async () => {
-        try {
-            const { data } = await axios.get("/api/show/all");
+    setUser(null);
+    setIsAdmin(false);
+    setFavoriteMovies([]);
 
-            if (data.success) {
-                setShows(data.shows);
-            } else {
-                toast.error(data.message);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    navigate("/login");
+  };
 
-    const fetchFavoriteMovies = async () => {
-        try {
-            const { data } = await axios.get("/api/user/favorite", {
-                headers: { Authorization: `Bearer ${await getToken()}` },
-            });
+  
+  const fetchIsAdmin = async () => {
+    try {
+      const { data } = await axios.get("/api/admin/is-admin");
+      setIsAdmin(data.success);
+    } catch (error) {
+      console.log("ADMIN CHECK ERROR:", error);
 
-            if (data.success) {
-                setFavoriteMovies(data.movies);
-            } else {
-                toast.error(data.message);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
+      setIsAdmin(false);
 
-    useEffect(() => {
-        fetchShows();
-    }, []);
+      if (error.response?.status === 401) {
+        logout();
+      }
+    }
+  };
 
-    useEffect(() => {
-        if (user) {
-            fetchIsAdmin();
-            fetchFavoriteMovies();
-        }
-    }, [user]);
+  
+  const fetchShows = async () => {
+    try {
+      const { data } = await axios.get("/api/show/all");
 
-    const value = {
-        axios,
-        fetchIsAdmin,
-        user,
-        getToken,
-        navigate,
-        isAdmin,
-        shows,
-        favoriteMovies,
-        fetchFavoriteMovies,
-        image_base_url,
-    };
+      if (data.success) {
+        setShows(data.shows);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log("SHOW ERROR:", error);
+    }
+  };
 
-    return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  
+  const fetchFavoriteMovies = async () => {
+    try {
+      const { data } = await axios.get("/api/user/favorites");
+
+      if (data.success) {
+        setFavoriteMovies(data.movies);
+      }
+    } catch (error) {
+      console.log("FAVORITE ERROR:", error);
+
+      if (error.response?.status === 401) {
+        logout();
+      }
+    }
+  };
+
+
+  useEffect(() => {
+    fetchShows();
+  }, []);
+
+  
+  useEffect(() => {
+    if (user) {
+      if (user.role === "admin") {
+        fetchIsAdmin();
+      } else {
+        setIsAdmin(false);
+      }
+
+      fetchFavoriteMovies();
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
+
+  
+  const value = {
+    axios,
+    user,
+    setUser,
+    logout,
+    navigate,
+    isAdmin,
+    fetchIsAdmin,
+    shows,
+    favoriteMovies,
+    fetchFavoriteMovies,
+    image_base_url,
+  };
+
+  return (
+    <AppContext.Provider value={value}>
+      {children}
+    </AppContext.Provider>
+  );
 };
+
 
 export const useAppContext = () => useContext(AppContext);

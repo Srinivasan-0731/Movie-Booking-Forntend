@@ -9,7 +9,8 @@ import { dateFormat } from "../../lib/dateFormat";
 
 function DashBoard() {
 
-    const { axios, getToken, user, image_base_url } = useAppContext();
+    
+    const { axios, user, image_base_url } = useAppContext();
 
     const currency = import.meta.env.VITE_CURRENCY;
 
@@ -47,9 +48,8 @@ function DashBoard() {
 
     const fetchDashboardData = async () => {
         try {
-            const { data } = await axios.get("/api/admin/dashboard", {
-                headers: { Authorization: `Bearer ${await getToken()}` },
-            });
+            
+            const { data } = await axios.get("/api/admin/dashboard");
 
             if (data.success) {
                 setDashboardData(data.dashboardData);
@@ -58,7 +58,8 @@ function DashBoard() {
                 toast.error(data.message);
             }
         } catch (error) {
-            toast.error("Error fetching dashboard data:", error);
+            toast.error("Error fetching dashboard data");
+            console.error(error);
         }
     };
 

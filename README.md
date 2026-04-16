@@ -15,7 +15,14 @@ Thank you for reviewing the application.
 
 * Demo Login Credentials:
 
-Email: [srini00731@gmail.com](mailto:srini00731@gmail.com)
+Email: [sp2392546@gmail.com]
+Password: movies@2026
+
+* Demo SignUp Credentials:
+
+FullName: Srinivasan
+Email: [sp2392546@gmail.com]
+Phone: [8056475810]
 Password: movies@2026
 
 * Instructions:
@@ -27,7 +34,7 @@ Password: movies@2026
 * Admin Access:
 
 Open /admin after login to access admin dashboard.
-admin Email: [srini00731@gmail.com]
+admin Email: [sp2392546@gmail.com]
 admin how to open in https://localhost:5173/admin
 
 ---

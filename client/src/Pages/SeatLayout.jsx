@@ -26,7 +26,8 @@ function SeatLayout() {
 
   const navigate = useNavigate();
 
-  const { axios, getToken, user } = useAppContext();
+  
+  const { axios, user } = useAppContext();
 
   const getShow = async () => {
     try {
@@ -71,7 +72,6 @@ function SeatLayout() {
       })}
     </div>
   );
-  
 
   const getOccupiedSeats = async () => {
     try {
@@ -95,10 +95,10 @@ function SeatLayout() {
       if (!selectedTime || !selectedSeats.length)
         return toast.error("Please select a time and seats");
 
+      
       const { data } = await axios.post(
         "/api/booking/create",
         { showId: selectedTime.showId, selectedSeats },
-        { headers: { Authorization: `Bearer ${await getToken()}` } },
       );
 
       if (data.success) {
@@ -108,7 +108,7 @@ function SeatLayout() {
           currency: "INR",
           order_id: data.orderId,
 
-          handler: async function (response){
+          handler: async function (response) {
             console.log("Payment Success", response);
 
             const verify = await axios.post("/api/booking/verify-payment", {
@@ -119,7 +119,7 @@ function SeatLayout() {
             });
 
             if (verify.data.success) {
-                navigate("/my-bookings");
+              navigate("/my-bookings");
             } else {
               toast.error("Payment verification failed");
             }

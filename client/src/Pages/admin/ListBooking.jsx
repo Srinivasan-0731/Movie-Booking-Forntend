@@ -6,17 +6,14 @@ import Title from '../../components/admin/Title';
 
 function ListBooking() {
     const currency = import.meta.env.VITE_CURRENCY;
-
-    const { axios, getToken, user } = useAppContext();
+    const { axios, user } = useAppContext();
 
     const [bookings, setBookings] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     
     const getAllBookings = async () => {
         try {
-            const {data} = await axios.get("/api/admin/all-bookings", {
-                headers: { Authorization: `Bearer ${await getToken()}`},
-            });
+            const { data } = await axios.get("/api/admin/all-bookings");
             setBookings(data.bookings);
         } catch (error) {
             console.error("Error fetching bookings:", error);
@@ -38,7 +35,7 @@ function ListBooking() {
             <thead>
                 <tr className='bg-primary/20 text-left text-white'>
                     <th className='p-2 font-bold pl-5'>User Name</th>
-                    <th className='p-2 font-bold'>Movie Nmae</th>
+                    <th className='p-2 font-bold'>Movie Name</th>
                     <th className='p-2 font-bold'>Show Time</th>
                     <th className='p-2 font-bold'>Seats</th>
                     <th className='p-2 font-bold'>Amount</th>
@@ -48,11 +45,11 @@ function ListBooking() {
                 {bookings?.map((item, index) => (
                     <tr key={index}
                     className='border-b border-primary/20 bg-primary/5 even:bg-primary/10'>
-                        <td className='p-2 min-w-45 pl-5'>{item.user.name}</td>
-                        <td className='p-2'>{item.show.movie.title}</td>
-                        <td className='p-2'>{dateFormat(item.show.showDateTime)}</td>
+                        <td className='p-2 min-w-45 pl-5'>{item.user?.fullName}</td>
+                        <td className='p-2'>{item.show?.movie?.title}</td>
+                        <td className='p-2'>{dateFormat(item.show?.showDateTime)}</td>
                         <td className='p-2'>
-                            {Object.keys(item.bookedSeats)
+                            {item.bookedSeats && Object.keys(item.bookedSeats)
                             .map((seat) => item.bookedSeats[seat])
                             .join(", ")}
                         </td>
