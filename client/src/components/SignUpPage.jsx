@@ -4,7 +4,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
 const SignupPage = () => {
-  const { navigate } = useAppContext();
+  const { navigate, axios } = useAppContext();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,27 +29,18 @@ const SignupPage = () => {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:3000/api/user/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fullName,
-          email,
-          phone: formattedPhone,
-          password,
-        }),
+      // Using axios from AppContext which already has baseURL set from env
+      const { data } = await axios.post("/api/user/signup", {
+        fullName,
+        email,
+        phone: formattedPhone,
+        password,
       });
-
-      const data = await res.json();
 
       if (!data.success) return alert(data.message);
 
-      
       alert("Signup successful. Please login.");
       navigate("/login");
-
     } catch (err) {
       console.error(err);
       alert("Signup error");

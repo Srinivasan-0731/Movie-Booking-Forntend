@@ -7,6 +7,19 @@ This frontend communicates with the **Movie Booking Backend API**.
 
 ---
 
+
+
+# Important Points
+
+* First SignUp the Account.
+
+* And after to the Login.
+
+---
+
+
+
+
 # Login accuracy
 
 Hello,

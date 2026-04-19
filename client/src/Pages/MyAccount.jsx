@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
+import { X } from "lucide-react";
 
 export default function MyAccount() {
-  const { user, setUser, axios, logout } = useAppContext();
+  const { user, setUser, axios, logout, navigate } = useAppContext();
 
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState("");
@@ -100,12 +101,19 @@ export default function MyAccount() {
 
   return (
     <div className="min-h-screen pt-28 px-4 flex items-start justify-center">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md relative">
 
-        
+    
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute -top-10 mt-11 mr-3 right-0 text-gray-400 hover:text-white transition cursor-pointer z-10"
+        >
+          <X className="w-8 h-8 hover:bg-red-700 rounded-md" />
+        </button>
+
         <div className="bg-gray-900 border border-gray-700 rounded-2xl overflow-hidden">
 
-          
+        
           <div className="bg-gray-800 px-6 py-6 flex items-center gap-4 border-b border-gray-700">
             {preview ? (
               <img src={preview} className="w-16 h-16 rounded-full object-cover" />
@@ -136,12 +144,10 @@ export default function MyAccount() {
             </div>
           ) : (
             <div className="px-6 py-4 space-y-3">
-              {isEditing && (
-                <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Profile Photo</label>
-                  <input type="file" onChange={pickImage} className="text-sm text-gray-300" />
-                </div>
-              )}
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Profile Photo</label>
+                <input type="file" onChange={pickImage} className="text-sm text-gray-300" />
+              </div>
               {[
                 { label: "Full Name", value: fullName, setter: setFullName },
                 { label: "Username", value: username, setter: setUsername },
@@ -164,43 +170,31 @@ export default function MyAccount() {
           <div className="px-6 py-4 border-t border-gray-700 grid grid-cols-2 gap-2">
             {!isEditing ? (
               <>
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="py-2 rounded-lg text-sm font-medium bg-purple-900 text-purple-200 hover:bg-purple-800 transition cursor-pointer"
-                >
+                <button onClick={() => setIsEditing(true)}
+                  className="py-2 rounded-lg text-sm font-medium bg-purple-900 text-purple-200 hover:bg-purple-800 transition cursor-pointer">
                   Edit Profile
                 </button>
-                <button
-                  onClick={() => setShowPwd(true)}
-                  className="py-2 rounded-lg text-sm font-medium bg-gray-800 text-gray-200 border border-gray-600 hover:bg-gray-700 transition cursor-pointer"
-                >
+                <button onClick={() => setShowPwd(true)}
+                  className="py-2 rounded-lg text-sm font-medium bg-gray-800 text-gray-200 border border-gray-600 hover:bg-gray-700 transition cursor-pointer">
                   Change Password
                 </button>
-                <button
-                  onClick={() => setShowAddAccount(true)}
-                  className="py-2 rounded-lg text-sm font-medium bg-gray-800 text-gray-200 border border-gray-600 hover:bg-gray-700 transition cursor-pointer"
-                >
+                <button onClick={() => setShowAddAccount(true)}
+                  className="py-2 rounded-lg text-sm font-medium bg-gray-800 text-gray-200 border border-gray-600 hover:bg-gray-700 transition cursor-pointer">
                   Add Account
                 </button>
-                <button
-                  onClick={logout}
-                  className="py-2 rounded-lg text-sm font-medium bg-red-900 text-red-300 hover:bg-red-800 transition cursor-pointer"
-                >
+                <button onClick={logout}
+                  className="py-2 rounded-lg text-sm font-medium bg-red-900 text-red-300 hover:bg-red-800 transition cursor-pointer">
                   Logout
                 </button>
               </>
             ) : (
               <>
-                <button
-                  onClick={save}
-                  className="py-2 rounded-lg text-sm font-medium bg-purple-900 text-purple-200 hover:bg-purple-800 transition cursor-pointer"
-                >
+                <button onClick={save}
+                  className="py-2 rounded-lg text-sm font-medium bg-purple-900 text-purple-200 hover:bg-purple-800 transition cursor-pointer">
                   Save
                 </button>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="py-2 rounded-lg text-sm font-medium bg-gray-800 text-gray-200 border border-gray-600 hover:bg-gray-700 transition cursor-pointer"
-                >
+                <button onClick={() => setIsEditing(false)}
+                  className="py-2 rounded-lg text-sm font-medium bg-gray-800 text-gray-200 border border-gray-600 hover:bg-gray-700 transition cursor-pointer">
                   Cancel
                 </button>
               </>
@@ -211,7 +205,16 @@ export default function MyAccount() {
         
         {showPwd && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-80 space-y-3">
+            <div className="relative bg-gray-900 border border-gray-700 rounded-2xl p-6 w-80 space-y-3">
+
+        
+              <button
+                onClick={() => setShowPwd(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
               <h3 className="text-base font-semibold text-white">Change Password</h3>
               <input
                 type="password"
@@ -228,17 +231,9 @@ export default function MyAccount() {
                 className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
               />
               <div className="flex gap-2 pt-1">
-                <button
-                  onClick={changePwd}
-                  className="flex-1 py-2 rounded-lg text-sm font-medium bg-purple-900 text-purple-200 hover:bg-purple-800 transition cursor-pointer"
-                >
+                <button onClick={changePwd}
+                  className="flex-1 py-2 rounded-lg text-sm font-medium bg-purple-900 text-purple-200 hover:bg-purple-800 transition cursor-pointer">
                   Update
-                </button>
-                <button
-                  onClick={() => setShowPwd(false)}
-                  className="flex-1 py-2 rounded-lg text-sm font-medium bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700 transition cursor-pointer"
-                >
-                  Cancel
                 </button>
               </div>
             </div>
@@ -248,7 +243,16 @@ export default function MyAccount() {
         
         {showAddAccount && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-80 space-y-3">
+            <div className="relative bg-gray-900 border border-gray-700 rounded-2xl p-6 w-80 space-y-3">
+
+              
+              <button
+                onClick={() => setShowAddAccount(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
               <h3 className="text-base font-semibold text-white">Add to Another Account</h3>
               <input
                 placeholder="Enter account email"
@@ -257,17 +261,9 @@ export default function MyAccount() {
                 className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
               />
               <div className="flex gap-2 pt-1">
-                <button
-                  onClick={addToAnotherAccount}
-                  className="flex-1 py-2 rounded-lg text-sm font-medium bg-purple-900 text-purple-200 hover:bg-purple-800 transition cursor-pointer"
-                >
+                <button onClick={addToAnotherAccount}
+                  className="flex-1 py-2 rounded-lg text-sm font-medium bg-purple-900 text-purple-200 hover:bg-purple-800 transition cursor-pointer">
                   Add
-                </button>
-                <button
-                  onClick={() => setShowAddAccount(false)}
-                  className="flex-1 py-2 rounded-lg text-sm font-medium bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700 transition cursor-pointer"
-                >
-                  Cancel
                 </button>
               </div>
             </div>

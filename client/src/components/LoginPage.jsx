@@ -4,7 +4,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
 const LoginPage = () => {
-  const { navigate, setUser } = useAppContext();
+  const { navigate, setUser, axios } = useAppContext();
 
   const [loginType, setLoginType] = useState("email");
   const [email, setEmail] = useState("");
@@ -26,15 +26,11 @@ const LoginPage = () => {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:3000/api/user/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ identifier, password }),
+      // Using axios from AppContext which already has baseURL set from env
+      const { data } = await axios.post("/api/user/login", {
+        identifier,
+        password,
       });
-
-      const data = await res.json();
 
       if (!data.success) return alert(data.message);
 
@@ -44,7 +40,6 @@ const LoginPage = () => {
       setUser(data.user);
 
       navigate("/");
-
     } catch (err) {
       console.error(err);
       alert("Login error");
@@ -62,8 +57,7 @@ const LoginPage = () => {
         <form onSubmit={handleLogin} className="relative z-10 mt-16">
           <h2 className="text-center text-xl font-semibold mb-6">Login</h2>
 
-          
-          <div className="flex mb-4 bg-gray-200 rounded-full p-1 ">
+          <div className="flex mb-4 bg-gray-200 rounded-full p-1">
             <button
               type="button"
               onClick={() => {
@@ -91,7 +85,6 @@ const LoginPage = () => {
             </button>
           </div>
 
-          
           {loginType === "email" ? (
             <input
               type="email"
@@ -111,7 +104,6 @@ const LoginPage = () => {
             </div>
           )}
 
-          
           <div className="relative mb-2">
             <input
               type={showPassword ? "text" : "password"}
@@ -136,7 +128,7 @@ const LoginPage = () => {
           </button>
 
           <p className="text-center text-sm mt-4 text-gray-900 font-medium">
-            Don’t have an account?{" "}
+            Don't have an account?{" "}
             <span
               className="text-pink-500 cursor-pointer font-medium"
               onClick={() => navigate("/signup")}
