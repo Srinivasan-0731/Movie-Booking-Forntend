@@ -9,7 +9,6 @@ import { dateFormat } from "../../lib/dateFormat";
 
 function DashBoard() {
 
-    
     const { axios, user, image_base_url } = useAppContext();
 
     const currency = import.meta.env.VITE_CURRENCY;
@@ -26,12 +25,12 @@ function DashBoard() {
     const dashboardCards = [
         {
             title: "Total Bookings",
-            value: dashboardData.totalBookings || "0",
+            value: dashboardData.totalBookings || dashboardData.totalBooking || "0",
             icon: ChartLineIcon,
         },
         {
             title: "Active Revenue",
-            value: currency + dashboardData.totalRevenue || "0",
+            value: currency + (dashboardData.totalRevenue || "0"),
             icon: CircleDollarSignIcon,
         },
         {
@@ -48,7 +47,6 @@ function DashBoard() {
 
     const fetchDashboardData = async () => {
         try {
-            
             const { data } = await axios.get("/api/admin/dashboard");
 
             if (data.success) {
@@ -90,26 +88,28 @@ function DashBoard() {
             <p className='mt-10 text-lg font-bold'>Active Shows</p>
             <div className='relative flex flex-wrap gap-6 mt-4 max-w-5xl'>
                 <BlurCircle top="100px" left="-10%" />
-                {dashboardData.activeShows.map((show) => (
-                    <div key={show._id}
-                        className='w-55 rounded-lg overflow-hidden h-full pb-3 bg-primary/10 border border-primary/20 hover:-translate-y-1 transition duration-300'>
-                        <img src={image_base_url + show.movie.poster_path} alt='poster'
-                            className='h-60 w-full object-cover' />
-                        <p className='font-bold p-2 truncate'>{show.movie.title}</p>
-                        <div className='flex items-center justify-between px-2'>
-                            <p className='text-lg font-bold'>
-                                {currency} {show.showPrice}
-                            </p>
-                            <p className='flex items-center gap-1 text-sm text-gray-400 mt-1 pr-1'>
-                                <StarIcon className='w-4 h-4 text-primary fill-primary' />
-                                {show.movie.vote_average.toFixed(1)}
+                {dashboardData.activeShows
+                    .filter((show) => show.movie)
+                    .map((show) => (
+                        <div key={show._id}
+                            className='w-55 rounded-lg overflow-hidden h-full pb-3 bg-primary/10 border border-primary/20 hover:-translate-y-1 transition duration-300'>
+                            <img src={image_base_url + (show.movie?.poster_path || '')} alt='poster'
+                                className='h-60 w-full object-cover' />
+                            <p className='font-bold p-2 truncate'>{show.movie?.title || 'Unknown'}</p>
+                            <div className='flex items-center justify-between px-2'>
+                                <p className='text-lg font-bold'>
+                                    {currency} {show.showPrice}
+                                </p>
+                                <p className='flex items-center gap-1 text-sm text-gray-400 mt-1 pr-1'>
+                                    <StarIcon className='w-4 h-4 text-primary fill-primary' />
+                                    {show.movie?.vote_average?.toFixed(1) || '0.0'}
+                                </p>
+                            </div>
+                            <p className='px-2 pt-2 text-sm text-gray-500'>
+                                {dateFormat(show.showDateTime)}
                             </p>
                         </div>
-                        <p className='px-2 pt-2 text-sm text-gray-500'>
-                            {dateFormat(show.showDateTime)}
-                        </p>
-                    </div>
-                ))}
+                    ))}
             </div>
         </>
     ) : (

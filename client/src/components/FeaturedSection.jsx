@@ -10,7 +10,6 @@ function FeaturedSection() {
 
     const navigate = useNavigate();
     const { shows } = useAppContext();
-    
 
     return (
         <div className='px-6 mg:px-16 lg:px-24 xl:px-44 overflow-hidden'>
@@ -26,9 +25,12 @@ function FeaturedSection() {
             </div>
 
             <div className='flex flex-wrap max-sm:justify-center gap-8 mt-8'>
-                {shows.slice(0, 4).map((show) => (
-                    <MovieCard key={show._id} movie={show} />
-                ))}
+                {shows
+                    .filter((show) => show.movie && show.movie._id) 
+                    .slice(0, 4)
+                    .map((show, index) => (
+                        <MovieCard key={show.movie._id || index} movie={show.movie} />
+                    ))}
             </div>
 
             <div className='flex justify-center mt-20'>
@@ -42,4 +44,4 @@ function FeaturedSection() {
     )
 }
 
-export default FeaturedSection
+export default FeaturedSection;

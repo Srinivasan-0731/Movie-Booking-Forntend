@@ -13,8 +13,8 @@ function Movies() {
       <BlurCircle bottom='50px' right='50px' />
       <h1 className='text-lg font-bold my-4'>Now Showing</h1>
       <div className='flex flex-wrap max-sm:justify-center gap-8'>
-        {shows.map((movie) => (
-          <MovieCard movie={movie} key={movie._id}  />
+        {shows.map((show, index) => (
+          <MovieCard movie={show.movie} key={show.movie?._id || index} />
         ))}
       </div>
     </div>

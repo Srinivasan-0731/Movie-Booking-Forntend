@@ -68,7 +68,6 @@ const MovieDetails = () => {
   return show ? (
     <div className="px-6 md:px-16 lg:px-40 pt-30 md:pt-50">
 
-    
       {showTrailer && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
           <div className="relative w-full max-w-4xl aspect-video">
@@ -95,7 +94,6 @@ const MovieDetails = () => {
         </div>
       )}
 
-      
       <div className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto">
         <img
           src={image_base_url + show.movie.poster_path}
@@ -152,7 +150,6 @@ const MovieDetails = () => {
         </div>
       </div>
 
-      
       {show.cast && show.cast.length > 0 && (
         <div className="mt-14 max-w-6xl mx-auto">
           <h2 className="text-lg font-medium mb-6">Cast</h2>
@@ -192,9 +189,12 @@ const MovieDetails = () => {
       <p className="text-lg font-medium mt-20 mb-8">You May Also Like</p>
 
       <div className="flex flex-wrap max-sm:justify-center gap-8">
-        {shows.slice(0, 4).map((movie, index) => (
-          <MovieCard key={index} movie={movie} />
-        ))}
+        {shows
+          .filter((s) => s.movie && s.movie._id) 
+          .slice(0, 4)
+          .map((s, index) => (
+            <MovieCard key={s.movie._id || index} movie={s.movie} />
+          ))}
       </div>
 
       <div className="flex justify-center mt-20">

@@ -6,6 +6,8 @@ import { kConverter } from "../../lib/kConverter";
 import Title from "../../components/admin/Title";
 import Loading from "../../components/Loading";
 
+const SCREENS = ["Screen 1", "Screen 2", "Screen 3"];
+
 function AddShows() {
   const { axios, user, image_base_url } = useAppContext();
 
@@ -17,8 +19,9 @@ function AddShows() {
   const [dateTimeInput, setDateTimeInput] = useState("");
   const [showPrice, setShowPrice] = useState("");
   const [addingShow, setAddingShow] = useState(false);
-
   
+  const [selectedScreen, setSelectedScreen] = useState("Screen 1");
+
   const fetchNowPlayingMovies = async () => {
     try {
       const { data } = await axios.get("/api/show/now-playing");
@@ -30,7 +33,6 @@ function AddShows() {
     }
   };
 
-
   const handleDateTimeAdd = () => {
     if (!dateTimeInput) return;
 
@@ -39,31 +41,25 @@ function AddShows() {
 
     setDateTimeSelection((prev) => {
       const times = prev[date] || [];
-
       if (!times.includes(time)) {
         return { ...prev, [date]: [...times, time] };
       }
-
       return prev;
     });
 
     setDateTimeInput("");
   };
 
-
   const handleRemoveTime = (date, time) => {
     setDateTimeSelection((prev) => {
       const filtered = prev[date].filter((t) => t !== time);
-
       if (filtered.length === 0) {
         const { [date]: _, ...rest } = prev;
         return rest;
       }
-
       return { ...prev, [date]: filtered };
     });
   };
-
 
   const handleSubmit = async () => {
     if (
@@ -75,11 +71,13 @@ function AddShows() {
       return toast.error("Invalid input");
     }
 
+    
     const showsInput = Object.entries(dateTimeSelection).flatMap(
       ([date, times]) =>
         times.map((time) => ({
           date,
           time,
+          screen: selectedScreen,
         }))
     );
 
@@ -99,6 +97,7 @@ function AddShows() {
         setSelectMovie(null);
         setDateTimeSelection({});
         setShowPrice("");
+        setSelectedScreen("Screen 1");
       } else {
         toast.error(data.message);
       }
@@ -120,7 +119,6 @@ function AddShows() {
     <>
       <Title text1="Add" text2="Shows" />
 
-    
       <p className="mt-10 text-lg font-bold">Now Playing Movies</p>
 
       <div className="overflow-x-auto pb-4">
@@ -165,10 +163,8 @@ function AddShows() {
       
       <div className="mt-6">
         <label className="block font-bold mb-2">Show Price</label>
-
         <div className="flex items-center gap-2">
           <span className="text-gray-500">{currency}</span>
-
           <input
             type="number"
             min={0}
@@ -178,7 +174,6 @@ function AddShows() {
             className="border px-3 py-2 rounded"
           />
         </div>
-
         {showPrice && (
           <p className="mt-2 text-green-500 font-semibold">
             {currency} {showPrice}
@@ -187,9 +182,31 @@ function AddShows() {
       </div>
 
       
+      <div className="mt-6">
+        <label className="block font-bold mb-2">Select Screen</label>
+        <div className="flex gap-3">
+          {SCREENS.map((screen) => (
+            <button
+              key={screen}
+              onClick={() => setSelectedScreen(screen)}
+              className={`px-4 py-2 rounded border text-sm font-medium cursor-pointer transition ${
+                selectedScreen === screen
+                  ? "bg-primary text-white border-primary"
+                  : "border-gray-500 text-gray-300 hover:border-primary hover:text-primary"
+              }`}
+            >
+              {screen}
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-sm text-green-500 font-semibold">
+          Selected: {selectedScreen}
+        </p>
+      </div>
+
+      
       <div className="mt-6 cursor-pointer">
         <label className="block font-bold mb-2">Select Date & Time</label>
-
         <div className="flex gap-3">
           <input
             type="datetime-local"
@@ -197,7 +214,6 @@ function AddShows() {
             onChange={(e) => setDateTimeInput(e.target.value)}
             className="border px-3 py-2 rounded cursor-pointer"
           />
-
           <button
             onClick={handleDateTimeAdd}
             className="bg-blue-500 text-white px-4 rounded cursor-pointer"
@@ -210,12 +226,10 @@ function AddShows() {
       
       {Object.keys(dateTimeSelection).length > 0 && (
         <div className="mt-6">
-          <p className="font-bold mb-2">Selected Date-Time</p>
-
+          <p className="font-bold mb-2">Selected Date-Time ({selectedScreen})</p>
           {Object.entries(dateTimeSelection).map(([date, times]) => (
             <div key={date} className="mb-3">
               <p className="font-semibold">{date}</p>
-
               <div className="flex flex-wrap gap-2 mt-1">
                 {times.map((time) => (
                   <div
@@ -236,7 +250,6 @@ function AddShows() {
         </div>
       )}
 
-      
       <button
         onClick={handleSubmit}
         disabled={addingShow}
