@@ -14,7 +14,9 @@ function ListBooking() {
     const getAllBookings = async () => {
         try {
             const { data } = await axios.get("/api/admin/all-bookings");
-            setBookings(data.bookings);
+            if (data.success) {
+                setBookings(data.bookings || []);
+            }
         } catch (error) {
             console.error("Error fetching bookings:", error);
         }
@@ -39,27 +41,41 @@ function ListBooking() {
                     <th className='p-2 font-bold'>Show Time</th>
                     <th className='p-2 font-bold'>Seats</th>
                     <th className='p-2 font-bold'>Amount</th>
+                    <th className='p-2 font-bold'>Status</th>
                 </tr>
             </thead>
             <tbody className='text-sm font-light'>
-                {bookings?.map((item, index) => (
-                    <tr key={index}
-                    className='border-b border-primary/20 bg-primary/5 even:bg-primary/10'>
-                        <td className='p-2 min-w-45 pl-5'>{item.user?.fullName}</td>
-                        <td className='p-2'>{item.show?.movie?.title}</td>
-                        <td className='p-2'>{dateFormat(item.show?.showDateTime)}</td>
-                        <td className='p-2'>
-                            {item.bookedSeats && Object.keys(item.bookedSeats)
-                            .map((seat) => item.bookedSeats[seat])
-                            .join(", ")}
-                        </td>
-                        <td className='p-2'>
-                            {currency} {item.amount}
-                        </td>
-                    </tr>
-                ))}
+                {bookings?.map((item, index) => {
+                    // bookedSeats Array type — join() directly
+                    const seats = Array.isArray(item.bookedSeats)
+                        ? item.bookedSeats.join(", ")
+                        : Object.values(item.bookedSeats || {}).join(", ");
+
+                    return (
+                        <tr key={index}
+                        className='border-b border-primary/20 bg-primary/5 even:bg-primary/10'>
+                            <td className='p-2 min-w-45 pl-5'>{item.user?.fullName}</td>
+                            <td className='p-2'>{item.show?.movie?.title}</td>
+                            <td className='p-2'>{dateFormat(item.show?.showDateTime)}</td>
+                            <td className='p-2'>{seats}</td>
+                            <td className='p-2'>{currency} {item.amount}</td>
+                            <td className='p-2'>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                    item.isPaid
+                                        ? "bg-green-500/20 text-green-400"
+                                        : "bg-yellow-500/20 text-yellow-400"
+                                }`}>
+                                    {item.isPaid ? "Paid" : "Pending"}
+                                </span>
+                            </td>
+                        </tr>
+                    );
+                })}
             </tbody>
         </table>
+        {bookings.length === 0 && (
+            <p className="text-center text-gray-400 py-8">No bookings found</p>
+        )}
       </div>
     </>
   ) : (

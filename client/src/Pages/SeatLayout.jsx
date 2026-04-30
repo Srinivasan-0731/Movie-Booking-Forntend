@@ -31,11 +31,13 @@ function SeatLayout() {
 
   const currency = import.meta.env.VITE_CURRENCY;
 
+  //  FIX 1: data.success && data.movie check தப்பு இருந்தது
+  
   const getShow = async () => {
     try {
       const { data } = await axios.get(`/api/show/${id}`);
       if (data.success && data.movie) {
-        setShow(data);
+        setShow(data); 
       } else {
         toast.error(data.message || "Show not found");
       }
@@ -45,6 +47,8 @@ function SeatLayout() {
     }
   };
 
+  //  FIX 2: Screen list — backend nested format { date: { screen: [...] } }
+  
   const getScreens = () => {
     if (!show?.dateTime || !date) return [];
     const dateData = show.dateTime[date];
@@ -129,11 +133,13 @@ function SeatLayout() {
     }
   };
 
+  // FIX 3: Price calculation — seats × showPrice
   const showPrice = getShowPrice();
   const totalPrice = selectedSeats.length * showPrice;
   const convenienceFee = Math.round(totalPrice * 0.05);
   const grandTotal = totalPrice + convenienceFee;
 
+  
   const handleProceed = () => {
     if (!user) return toast.error("Please login to proceed");
     if (!selectedScreen) return toast.error("Please select a screen");
@@ -184,7 +190,7 @@ function SeatLayout() {
     }
   };
 
-  // Pay Later — booking create pannuchu but payment pending
+  // Pay Later
   const payLater = async () => {
     try {
       if (!user) return toast.error("Please login to proceed");
@@ -226,6 +232,7 @@ function SeatLayout() {
   const screens = getScreens();
   const timesForScreen = getTimesForScreen();
 
+  
   if (showReview) {
     return (
       <div className='min-h-screen px-6 md:px-16 lg:px-40 py-30 md:pt-40'>
@@ -241,6 +248,7 @@ function SeatLayout() {
 
         <div className='max-w-xl bg-primary/8 border border-primary/20 rounded-xl p-6 space-y-5'>
 
+          {/* Movie Info */}
           <div className='flex gap-4'>
             <img
               src={image_base_url + show.movie.poster_path}
@@ -260,6 +268,7 @@ function SeatLayout() {
 
           <hr className='border-primary/20' />
 
+          {/* Booking Details */}
           <div className='space-y-2 text-sm'>
             <div className='flex justify-between'>
               <span className='text-gray-400'>Date</span>
@@ -285,6 +294,7 @@ function SeatLayout() {
 
           <hr className='border-primary/20' />
 
+          {/* Price Breakdown */}
           <div className='space-y-2 text-sm'>
             <div className='flex justify-between'>
               <span className='text-gray-400'>Price per seat</span>
@@ -307,7 +317,6 @@ function SeatLayout() {
             <span className='text-primary'>{currency}{grandTotal}</span>
           </div>
 
-          
           <button
             onClick={bookTickets}
             className='w-full flex items-center justify-center gap-2 py-3 bg-primary hover:bg-primary-dull transition rounded-full font-bold cursor-pointer active:scale-95'
@@ -316,7 +325,6 @@ function SeatLayout() {
             <ArrowRightIcon strokeWidth={3} className='w-4 h-4' />
           </button>
 
-          
           <button
             onClick={payLater}
             className='w-full flex items-center justify-center gap-2 py-3 border border-primary/50 hover:bg-primary/10 transition rounded-full font-bold cursor-pointer active:scale-95 text-primary'
@@ -336,10 +344,12 @@ function SeatLayout() {
   return (
     <div className='flex flex-col md:flex-row px-6 md:px-16 lg:px-40 py-30 md:pt-50 gap-12'>
 
-    
+      {/* FIX 1 & 2: Left Sidebar — Screen + Time Selection */}
       <div className='w-64 bg-primary/10 border border-primary/20 rounded-lg py-8 md:sticky md:top-30'>
 
         <p className='text-lg font-semibold px-6 mb-4'>Select Screen</p>
+
+        {/* Screen List */}
         <div className='space-y-1 mb-4'>
           {screens.length > 0 ? screens.map((screen) => (
             <div
@@ -364,6 +374,7 @@ function SeatLayout() {
           )}
         </div>
 
+        {/* Time List for selected screen */}
         {selectedScreen && timesForScreen.length > 0 && (
           <>
             <hr className='border-primary/20 mx-4 mb-4' />
@@ -398,6 +409,7 @@ function SeatLayout() {
         )}
       </div>
 
+      {/* Right Side — Seat Grid */}
       <div className='relative flex-1 flex flex-col items-center max-md:mt-16'>
         <BlurCircle top='-100px' left='-100px' />
         <BlurCircle bottom='0' right='0' />
@@ -409,6 +421,7 @@ function SeatLayout() {
         <img src={imgLoad} alt='screen' />
         <p className='text-gray-400 text-sm mb-6'>SCREEN SIDE</p>
 
+        {/* Legend */}
         <div className='flex items-center gap-6 mb-6 text-xs text-gray-400'>
           <div className='flex items-center gap-1'>
             <div className='w-5 h-5 rounded border border-primary/60'></div>
@@ -424,6 +437,7 @@ function SeatLayout() {
           </div>
         </div>
 
+        {/* Seat Grid */}
         <div className='grid grid-cols-2 md:grid-cols-1 gap-8 md:gap-2 mb-6'>
           {groupRows[0].map((row) => renderSeats(row))}
         </div>
@@ -433,6 +447,7 @@ function SeatLayout() {
           ))}
         </div>
 
+    
         {selectedSeats.length > 0 && (
           <div className='mt-8 w-full max-w-md bg-primary/10 border border-primary/20 rounded-xl px-6 py-4 flex items-center justify-between'>
             <div>

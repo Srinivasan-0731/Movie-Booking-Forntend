@@ -10,7 +10,6 @@ const SCREENS = ["Screen 1", "Screen 2", "Screen 3"];
 
 function AddShows() {
   const { axios, user, image_base_url } = useAppContext();
-
   const currency = import.meta.env.VITE_CURRENCY;
 
   const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
@@ -19,7 +18,6 @@ function AddShows() {
   const [dateTimeInput, setDateTimeInput] = useState("");
   const [showPrice, setShowPrice] = useState("");
   const [addingShow, setAddingShow] = useState(false);
-  
   const [selectedScreen, setSelectedScreen] = useState("Screen 1");
 
   const fetchNowPlayingMovies = async () => {
@@ -35,29 +33,35 @@ function AddShows() {
 
   const handleDateTimeAdd = () => {
     if (!dateTimeInput) return;
-
     const [date, time] = dateTimeInput.split("T");
     if (!date || !time) return;
 
     setDateTimeSelection((prev) => {
-      const times = prev[date] || [];
-      if (!times.includes(time)) {
-        return { ...prev, [date]: [...times, time] };
+      const screenTimes = prev[date]?.[selectedScreen] || [];
+      if (!screenTimes.includes(time)) {
+        return {
+          ...prev,
+          [date]: {
+            ...(prev[date] || {}),
+            [selectedScreen]: [...screenTimes, time],
+          },
+        };
       }
       return prev;
     });
-
     setDateTimeInput("");
   };
 
-  const handleRemoveTime = (date, time) => {
+  const handleRemoveTime = (date, screen, time) => {
     setDateTimeSelection((prev) => {
-      const filtered = prev[date].filter((t) => t !== time);
-      if (filtered.length === 0) {
+      const filtered = prev[date][screen].filter((t) => t !== time);
+      const updatedScreens = { ...prev[date], [screen]: filtered };
+      if (filtered.length === 0) delete updatedScreens[screen];
+      if (Object.keys(updatedScreens).length === 0) {
         const { [date]: _, ...rest } = prev;
         return rest;
       }
-      return { ...prev, [date]: filtered };
+      return { ...prev, [date]: updatedScreens };
     });
   };
 
@@ -71,26 +75,21 @@ function AddShows() {
       return toast.error("Invalid input");
     }
 
-    
+    // date → screen → times format showsInput build 
     const showsInput = Object.entries(dateTimeSelection).flatMap(
-      ([date, times]) =>
-        times.map((time) => ({
-          date,
-          time,
-          screen: selectedScreen,
-        }))
+      ([date, screens]) =>
+        Object.entries(screens).flatMap(([screen, times]) =>
+          times.map((time) => ({ date, time, screen }))
+        )
     );
 
     try {
       setAddingShow(true);
-
-      const payload = {
+      const { data } = await axios.post("/api/show/add", {
         movieId: selectMovie,
         showsInput,
         showPrice: Number(showPrice),
-      };
-
-      const { data } = await axios.post("/api/show/add", payload);
+      });
 
       if (data.success) {
         toast.success(data.message);
@@ -110,9 +109,7 @@ function AddShows() {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchNowPlayingMovies();
-    }
+    if (user) fetchNowPlayingMovies();
   }, [user]);
 
   return nowPlayingMovies.length > 0 ? (
@@ -127,7 +124,12 @@ function AddShows() {
             <div
               key={movie.id}
               className="relative max-w-40 cursor-pointer hover:-translate-y-1 transition"
-              onClick={() => setSelectMovie(movie.id)}
+              onClick={() => {
+                setSelectMovie(movie.id);
+                setDateTimeSelection({});  
+                setShowPrice("");
+                setSelectedScreen("Screen 1");
+              }}
             >
               <div className="rounded-lg overflow-hidden">
                 <img
@@ -136,23 +138,18 @@ function AddShows() {
                   className="w-full object-cover"
                 />
               </div>
-
               <div className="text-sm flex justify-between p-1">
                 <span className="flex items-center gap-1 text-gray-400">
                   <StarIcon className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                   {movie.vote_average.toFixed(1)}
                 </span>
-                <span className="text-gray-400">
-                  {kConverter(movie.vote_count)}
-                </span>
+                <span className="text-gray-400">{kConverter(movie.vote_count)}</span>
               </div>
-
               {selectMovie === movie.id && (
                 <div className="absolute top-2 right-2 bg-green-500 p-1 rounded">
                   <CheckIcon className="w-4 h-4 text-white" />
                 </div>
               )}
-
               <p className="font-bold truncate">{movie.title}</p>
               <p className="text-sm text-gray-400">{movie.release_date}</p>
             </div>
@@ -160,7 +157,6 @@ function AddShows() {
         </div>
       </div>
 
-      
       <div className="mt-6">
         <label className="block font-bold mb-2">Show Price</label>
         <div className="flex items-center gap-2">
@@ -181,7 +177,6 @@ function AddShows() {
         )}
       </div>
 
-      
       <div className="mt-6">
         <label className="block font-bold mb-2">Select Screen</label>
         <div className="flex gap-3">
@@ -204,8 +199,7 @@ function AddShows() {
         </p>
       </div>
 
-      
-      <div className="mt-6 cursor-pointer">
+      <div className="mt-6">
         <label className="block font-bold mb-2">Select Date & Time</label>
         <div className="flex gap-3">
           <input
@@ -223,28 +217,29 @@ function AddShows() {
         </div>
       </div>
 
-      
       {Object.keys(dateTimeSelection).length > 0 && (
         <div className="mt-6">
-          <p className="font-bold mb-2">Selected Date-Time ({selectedScreen})</p>
-          {Object.entries(dateTimeSelection).map(([date, times]) => (
+          <p className="font-bold mb-2">Selected Date-Time</p>
+          {Object.entries(dateTimeSelection).map(([date, screens]) => (
             <div key={date} className="mb-3">
               <p className="font-semibold">{date}</p>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {times.map((time) => (
-                  <div
-                    key={time}
-                    className="border px-2 py-1 rounded flex items-center"
-                  >
-                    <span>{time}</span>
-                    <DeleteIcon
-                      size={14}
-                      className="ml-2 text-red-500 cursor-pointer"
-                      onClick={() => handleRemoveTime(date, time)}
-                    />
+              {Object.entries(screens).map(([screen, times]) => (
+                <div key={screen} className="ml-4 mt-1">
+                  <p className="text-sm text-primary font-medium">{screen}</p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {times.map((time) => (
+                      <div key={time} className="border px-2 py-1 rounded flex items-center">
+                        <span>{time}</span>
+                        <DeleteIcon
+                          size={14}
+                          className="ml-2 text-red-500 cursor-pointer"
+                          onClick={() => handleRemoveTime(date, screen, time)}
+                        />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           ))}
         </div>
