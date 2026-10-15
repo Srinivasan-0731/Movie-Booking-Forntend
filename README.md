@@ -3,7 +3,7 @@
 Frontend for the **Movie Booking Application** built with **React + Vite**.
 Users can browse movies, view showtimes, book tickets, manage favorites, and make payments.
 
-This frontend communicates with the **Movie Booking Backend API**.
+This frontend communicates with the ***Movie Booking Backend API***.
 
 ---
 
