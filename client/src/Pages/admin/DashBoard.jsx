@@ -25,11 +25,11 @@ function DashBoard() {
     const dashboardCards = [
         {
             title: "Total Bookings",
-            value: dashboardData.totalBookings || dashboardData.totalBooking || "0",
+            value: dashboardData.totalBookings || "0",
             icon: ChartLineIcon,
         },
         {
-            title: "Active Revenue",
+            title: "Total Revenue",
             value: currency + (dashboardData.totalRevenue || "0"),
             icon: CircleDollarSignIcon,
         },
@@ -51,13 +51,14 @@ function DashBoard() {
 
             if (data.success) {
                 setDashboardData(data.dashboardData);
-                setLoading(false);
             } else {
                 toast.error(data.message);
             }
         } catch (error) {
-            toast.error("Error fetching dashboard data");
+            toast.error(error.response?.data?.message || "Error fetching dashboard data");
             console.error(error);
+        } finally {
+            setLoading(false);
         }
     };
 
